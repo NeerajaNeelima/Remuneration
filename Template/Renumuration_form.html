@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% block title %}Remuneration Page{% endblock %}
+{% block additional_head %}  
+    <style>
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        input[type="number"] {
+          -moz-appearance: textfield;
+        }
+        .invalid-input {
+        border: 1px solid red; 
+        outline: none; 
+        box-shadow: 0 0 5px red; 
+        }
+        select:required:invalid {
+        border: 1px solid red;
+        }
+    </style>
+    {{ toastr.include_jquery() }}
+    {{ toastr.include_toastr_css() }}
+    {{ toastr.message() }}
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    {% endblock %}
+    {% block body %}
+  <body  class="d-flex justify-content-center align-items-center " style="min-height: 100vh">
+    <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh">
+    <div class="container shadow-lg p-3 mb-5 bg-body-tertiary rounded">
+      <form class="row g-3" action="{{url_for('index.submit_form')}}" method="post">
+            <div class="col-md-6">
+              <label for="inputCity" class="form-label" >PAN No : </label>
+              <span style="color: red;">*</span>
+              <input type="text" class="form-control " id="inputpanno" name="inputpanno" onblur="fetchStaffName()" required>
+            </div>
+            <div class="col-md-6">
+              <label for="inputEmail4" class="form-label">Proceedings No / Purpose : </label>
+              <span style="color: red;">*</span>
+              <input type="text" class="form-control " id="inputprceedingno" name="inputprceedingno" required>
+            </div>
+            <div class="col-md-6">
+              <label for="inputtext" class="form-label">Name of the Examination : </label>
+              <span style="color: red;">*</span>
+              <select id="inputnameofexamination" class="form-select " name="inputnameofexamination" required>
+                <option selected>Choose...</option>
+                <option>III year II sem</option>
+                <option>III year II sem</option>
+                <option>III year II sem</option>
+                <option>III year II sem</option>
+              </select>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="inputAddress" class="form-label">Name of the Subject : </label>
+              <input type="text" class="form-control " id="inputsubject" name="inputsubject" readonly>
+            </div>
+            <div class="col-md-6">
+              <label for="inputAddress2" class="form-label">Subject Code : </label>
+              <span style="color: red;">*</span>
+              <select id="inputcode" class="form-select " onchange="fetchSubjectName()" name="inputcode" required>
+                <option selected>Choose...</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="inputname" class="form-label">Name of the Staff </label>
+              <input type="text" class="form-control " id="inputname" name="inputname" readonly>
+          </div>
+              <div class="col-md-6">
+                <label for="inputEmail4" class="form-label">Phone No. </label>
+                <span style="color: red;">*</span>
+                <input type="number" class="form-control " id="inputphoneno" name="inputphoneno" onblur="validatePhoneNumber()" required>
+              </div>
+            <div class="col-md-6">
+              <label for="inputCity" class="form-label">Designation & Address : </label>
+              <span style="color: red;">*</span>
+              <input type="text" class="form-control" id="inputdesignation" spellcheck="true" name="inputdesignation" required>
+            </div>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+              <button type="submit" class="btn btn-primary btn-lg me-md-2" onclick="validateForm()">Submit</button>
+            </div>
+      </form>
+    </div>
+  </div>
+  {% endblock %}
+  {% block additional_scripts %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+    <script>
+    
+    //Axios function to fetch staff Name
+     function fetchStaffName() {
+        console.log("inside function");
+        var pan=jQuery("#inputpanno");
+        var panNumber = jQuery("#inputpanno").val();
+        console.log("PAN Number: ", panNumber);
+
+        // Add an exit condition to prevent infinite recursion
+        if (panNumber !== "") {
+          jQuery.ajax({
+          type: "GET",
+          url: "/get_staff_name",
+          data: { panNumber: panNumber },
+          success: function(response) {
+          if(response.staffName){
+            console.log(response.staffName)
+            
+          jQuery("#inputname").val(response.staffName);
+          pan.removeClass('invalid-input')
+          //console.log(response.staffName)
+          }
+          else {
+            // If staff name is not found, display a warning message
+            pan.addClass('invalid-input')
+            toastr.error('Not Found Staff Name! Please check your PAN Number', 'Warning');
+          }
+          
+        },
+          error: function(error) {
+            console.error("Error fetching staff name:", error);
+          }
+        });
+        }
+      }
+    
+    //Axios function to fetch all subject codes
+      function fetchAllSubjectCodes() {
+        $.ajax({
+            type: "GET",
+            url: "/get_all_subject_codes",
+            success: function(response) {
+                
+                console.log("inside subject")
+                $("#inputcode").empty();
+                $("#inputcode").append('<option selected>Choose...</option>');
+                 console.log(response.subjectCodes)
+                
+                for (var i = 0; i < response.subjectCodes.length; i++) {
+                //console.log("Adding option:", response.subjectNames[i]);
+                $("#inputcode").append('<option>' + response.subjectCodes[i] + '</option>');
+            }
+            },
+            error: function(error) {
+                console.error("Error fetching subject names:", error);
+            }
+        });
+    }
+
+    //Axios Function to fetch Subject Name
+    function fetchSubjectName(){
+      var subject_code=jQuery("#inputcode").val();
+      console.log(subject_code)
+      $.ajax({
+        type:"GET",
+        url:"/get_subject_name",
+        data:{subject_code:subject_code},
+        success:function(response){
+          
+          console.log(response.subjectName)
+          jQuery("#inputsubject").val(response.subjectName)
+        },
+        error:function(error){
+          console.log("Error in fetching subject Code");
+        }
+      });
+    }
+
+    //Function to validate Phone Number
+    function validatePhoneNumber() {
+        var phoneNumber = jQuery("#inputphoneno").val();
+
+        if (phoneNumber.length < 10) {
+            // If the count of digits is less than 10, display an error toast message
+            toastr.error('Phone Number should have at least 10 digits', 'Error');
+        }
+      }
+
+      function validateForm() {
+    console.log("Inside validate function");
+
+    var requiredFields = document.querySelectorAll('input[required], select[required]');
+    var isValid = true;
+
+    requiredFields.forEach(function (field) {
+        if (!field.checkValidity()) {
+            // If the field is not valid, show a red border and display a toast error
+            field.classList.add('invalid-input');
+            toastr.error('Please fill out the required fields', 'Error');
+            isValid = false;
+        } 
+    });
+
+    return isValid; // Allow form submission if all required fields are valid
+}
+
+
+
+    // Call fetchAllSubjectNames when the page loads
+    $(document).ready(function() {
+        fetchAllSubjectCodes();
+    });
+  </script>
+  {{ toastr.include_toastr_js() }}
+  {% endblock %}
